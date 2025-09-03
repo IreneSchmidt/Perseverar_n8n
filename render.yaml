@@ -1,69 +1,25 @@
-# Blueprint para implantar o n8n no Render com as configurações
-# de URL pública corretas para a integração com APIs externas.
-
 services:
   - type: web
     plan: free
-    runtime: image
-    name: n8n-service # Você pode manter este nome ou mudar para algo como "rede-perseverar"
-    image:
-      url: docker.io/n8nio/n8n:latest
-
-    # --- INÍCIO DA SEÇÃO CORRIGIDA ---
-    # Adicionamos as variáveis de ambiente essenciais aqui.
-    # O Render vai ler estas instruções e configurar o N8N corretamente.
+    name: n8n # Você pode renomear para rede-perseverar se quiser
+    runtime: docker
+    dockerfilePath: Dockerfile.render
+    dockerContext: .
     envVars:
-      # O NOME do seu serviço na internet (SEM https://)
-      # IMPORTANTE: Mude o valor abaixo para o nome real do seu serviço no Render!
-      # Exemplo: se a sua URL é https://meu-n8n.onrender.com, o valor aqui deve ser "meu-n8n.onrender.com"
       - key: N8N_HOST
-        value: n8n-service-vm2v.onrender.com # <-- MUDE ESTE VALOR
-
-        
-
-      # O PROTOCOLO que seu serviço usa (sempre https no Render)
-      - key: N8N_PROTOCOL
-        value: https
-
-      # A PORTA interna do N8N (padrão)
+        value: n8n-service-vm2v.onrender.com # <-- MUDE PARA O NOME DO SEU SERVIÇO
       - key: N8N_PORT
         value: 5678
-
-      # A URL COMPLETA para os Webhooks (COM https://)
-      # IMPORTANTE: Mude o valor abaixo para a URL completa e real do seu serviço no Render!
+      - key: N8N_PROTOCOL
+        value: https
       - key: WEBHOOK_URL
-        value: https://n8n-service-vm2v.onrender.com # <-- MUDE ESTE VALOR
-
-      # Fuso horário para o Brasil (Bônus, mas muito importante!)
+        value: https://n8n-service-vm2v.onrender.com # <-- MUDE PARA A SUA URL COMPLETA
       - key: GENERIC_TIMEZONE
         value: America/Sao_Paulo
-
-      # --- FIM DA SEÇÃO CORRIGIDA ---
-
-      # Chave de criptografia (essencial, não mexa)
       - key: N8N_ENCRYPTION_KEY
         generateValue: true
-
-      # Conexão com o Banco de Dados (essencial, não mexa)
-      - key: DB_TYPE
-        value: postgresdb
-      - key: DB_POSTG-RESDB_DATABASE
-        fromDatabase:
-          name: n8n-db
-          property: database
-      - key: DB_POSTGRESDB_HOST
-        fromDatabase:
-          name: n8n-db
-          property: host
-      - key: DB_POSTGRESDB_PASSWORD
-        fromDatabase:
-          name: n8n-db
-          property: password
-      - key: DB_POSTGRESDB_USER
-        fromDatabase:
-          name: n8n-db
-          property: user
+      - fromGroup: n8n-database
 
 databases:
-  - name: n8n-db
+  - name: n8n-database
     plan: free
